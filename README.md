@@ -1,5 +1,5 @@
 # Quadtree
-Quadtree is a C++ lightweight single header implementation of a quadtree data structure.
+Quadtree is a C++14 lightweight single header implementation of a quadtree data structure.
 
 # Key Features
 - [x] Simple
@@ -8,7 +8,7 @@ Quadtree is a C++ lightweight single header implementation of a quadtree data st
 - [x] Lightweight
 - [x] Easy to use
 - [x] Examples
-- [ ] Documentation
+- [x] Documentation
 
 # How to use
 Simply copy the `Quadtree.h` file from the `src/` foldier and place it in your project, that is it!
