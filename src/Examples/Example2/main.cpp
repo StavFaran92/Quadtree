@@ -16,7 +16,7 @@ using QueryRect = qtree::Rect;
 
 static const qtree::Rect MAP_BOUNDS = { 0, 0, WIDTH, HEIGHT };
 
-int main2()
+int main()
 {
     // Seed random
     std::srand(std::time(nullptr));

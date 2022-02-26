@@ -1,9 +1,9 @@
-set(TARGET_NAME Example1)
+set(TARGET_NAME Example2)
 
 # set the project name
 project(${TARGET_NAME}
 	VERSION 1.0
-    DESCRIPTION "Example 1"
+    DESCRIPTION "Example 2"
     LANGUAGES CXX)
 
 set(SOURCE_FILES main.cpp
