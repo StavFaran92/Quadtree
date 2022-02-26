@@ -21,10 +21,15 @@ int main()
 
     auto m_quadtree = std::make_shared<qtree::QuadTree<qtree::Point>>(MAP_BOUNDS, 4);
 
-    QueryCircle query(200, 200, 100);
-    //QueryRect query(200, 200, 200, 200);
+    QueryCircle query(WIDTH / 2, HEIGHT / 2, 100);
 
     std::vector<qtree::Point*> points;
+
+    sf::Font font;
+    if (!font.loadFromFile("arial.ttf"))
+    {
+        LOG_DEBUG("Failed to load font!");
+    }
 
     //for (int i = 0; i < 100; i++)
     //{
@@ -59,13 +64,13 @@ int main()
 
             if (event.type == sf::Event::KeyPressed)
             {
-                if (event.key.code == sf::Keyboard::A)
+                if (event.key.code == sf::Keyboard::R)
                 {
                     auto found = m_quadtree->query(query);
                     for (const auto& n : found)
                     {
                         LOG_DEBUG("Found Node: " << n);
-                        auto& point = n->data;
+                        auto point = n->data;
                         LOG_DEBUG("Found point: " << point);
                         m_quadtree->remove(*n);
                         points.erase(std::find(points.begin(), points.end(), point));
@@ -89,9 +94,6 @@ int main()
             Utils::drawCircle(window, qtree::Circle(p->x, p->y, 3), sf::Color::White);
         }
 
-        // draw query rectangle
-        //Utils::drawRectangle(window, query, sf::Color::Green);
-
         // draw query circle
         Utils::drawCircle(window, query, sf::Color::Green);
 
@@ -102,6 +104,16 @@ int main()
             Utils::drawCircle(window, qtree::Circle(n->data->x, n->data->y, 3), sf::Color::Green);
         }
 
+        sf::Text text1("Press the left mouse button to place points in the scene", font, 20);
+        text1.setPosition(10, 10);
+        text1.setColor(sf::Color::White);
+        window.draw(text1);
+
+        sf::Text text2("Press 'R' in the keyboard to erase points found by the query", font, 20);
+        text2.setPosition(10, 35);
+        text2.setColor(sf::Color::White);
+        window.draw(text2);
+
         window.display();
     }
 
@@ -110,8 +122,6 @@ int main()
     {
         delete points[i];
     }
-
-
 
     return 0;
 }

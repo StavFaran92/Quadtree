@@ -87,8 +87,8 @@ namespace qtree
             bound(bound) {};
 
     public:
-        T* data;
-        Rect  bound;
+        T* data = nullptr;
+        Rect bound;
 
     private:
         friend class QuadTree<T>;
@@ -187,7 +187,7 @@ namespace qtree
     template<typename T>
     inline bool QuadTree<T>::remove(const Node<T>& node)
     {
-        for (auto& t : node.qt)
+        for (auto t : node.qt)
         {
             auto& nodes = t->m_nodes;
             nodes.erase(std::find_if(nodes.begin(), nodes.end(), [&](const auto& other) { return other.get() == &node; }));
