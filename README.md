@@ -15,6 +15,8 @@ Simply copy the `Quadtree.h` file from the `src/` foldier and place it in your p
 you can see usage examples of the Quadtree in the Examples folder, an explenation on how to build the examples is below
 
 # Build Examples
+Quadtree examples use SFML in order to display, here is how you should use it:
+
 Download the source files 
 ```git
 git clone git@github.com:StavFaran92/Quadtree.git
