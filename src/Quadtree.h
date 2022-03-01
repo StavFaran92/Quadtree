@@ -1,3 +1,4 @@
+/** @file */
 #pragma once
 
 // STL
@@ -23,45 +24,81 @@ namespace qtree
     template<typename T> class Node;
     template<typename T> class QuadTree;
 
-    ///////////////////////////////////////////////////////
-    //////////////////////  Shape  ////////////////////////
-    ///////////////////////////////////////////////////////
+    /** \brief 
+     * Shape struct which represents a geometrical 2D shape
+     * 
+     */
     struct Shape {
+        /**
+         * intersects
+         * 
+         * Return if the given bound intersects with this Shape
+         * 
+         * \param bound A rect object to check againts
+         * \return True if intersects, False otherwise
+         */
         virtual bool intersects(const Rect& bound) const noexcept = 0;
+
+        /**
+         * contains
+         *
+         * Return if the given bound is contained within this Shape
+         *
+         * \param bound A rect object to check againts
+         * \return True if contained, False otherwise
+         */
         virtual bool contains(const Rect& bound) const noexcept = 0;
     };
 
 
-    ///////////////////////////////////////////////////////
-    //////////////////////  Point  ////////////////////////
-    ///////////////////////////////////////////////////////
+    /** \brief
+     * Point struct which represents a Point in a 2D space
+     *
+     */
     struct Point {
+        /** Constructor */
         Point(double x, double y) : x(x), y(y) {};
 
         double x, y;
     };
 
-    ///////////////////////////////////////////////////////
-    //////////////////////  Circle  ///////////////////////
-    ///////////////////////////////////////////////////////
+    /** \brief
+     * Circle struct which extends Shape, this struct represents a 2D Circle
+     *
+     */
     struct Circle : public Shape
     {
+        /** Constructor */
         Circle(const Circle& other) : x(other.x), y(other.y), radius(other.radius) {};
+
+        /** Constructor */
         Circle(double x, double y, double radius) : x(x), y(y), radius(radius){};
 
+        /** See delecration of Shape */
         bool intersects(const Rect& bound) const noexcept override;
+
+        /** See delecration of Shape */
         bool contains(const Rect& bound) const noexcept override;
 
-        double x, y, radius;
+        /** The Circle X coord, Center of the circle */
+        double x; 
+
+        /**< The Circle Y coord, Center of the circle */
+        double y;
+        double radius;
     };
 
-    ///////////////////////////////////////////////////////
-    //////////////////////  Rectangle  ////////////////////
-    ///////////////////////////////////////////////////////
-    struct Rect : public Shape {
+    /** \brief
+     * Rect struct which extends Shape, this struct represents a 2D Rectangle
+     *
+     */
+    struct Rect : public Shape 
+    {
+        /** Constructor */
         Rect(const Rect& other) : Rect(other.x, other.y, other.width, other.height) 
         {}
 
+        /** Constructor */
         Rect(double x, double y, double width, double height) :
             x(x),
             y(y),
@@ -69,19 +106,27 @@ namespace qtree
             height(height) 
         {}
 
+        /** See delecration of Shape */
         bool intersects(const Rect& other) const noexcept override;
+
+        /** See delecration of Shape */
         bool contains(const Rect& other) const noexcept override;
 
         double x, y, width, height;
     };
 
-    ///////////////////////////////////////////////////////
-    //////////////////////  Node  /////////////////////////
-    ///////////////////////////////////////////////////////
+    /** \Brief
+     * The main object used by the quad tree to handle data
+     * 
+     * The main object used by the quad tree to handle data, it contains a pointer to the data and a bound 
+     * object which is the object bound representation in the 2D space
+     * 
+     */
     template<typename T>
     class Node {
         
     public:
+        /** Constructor */
         Node(T* data = {}, const Rect& bound = {}) :
             data(data),
             bound(bound) {};
@@ -96,40 +141,99 @@ namespace qtree
     };
 
 
-    ///////////////////////////////////////////////////////
-    /////////////////////  Quadtree  //////////////////////
-    ///////////////////////////////////////////////////////
+    /** \brief
+     * Quadtree data structure
+     *
+     * A quadtree is a tree data structure in which each internal node has exactly four children. 
+     * Quadtrees are the two-dimensional analog of octrees and are most often used to partition 
+     * a two-dimensional space by recursively subdividing it into four quadrants or regions. 
+     * The data associated with a leaf cell varies by application, 
+     * but the leaf cell represents a "unit of interesting spatial information".
+     * 
+     * From Wikipedia, the free encyclopedia
+     *
+     */
     template<typename T>
     class QuadTree {
     public:
+        /** Constructor */
         QuadTree(const Rect& bound, unsigned capacity);
+
+        /** Copy Constructor */
         QuadTree(const QuadTree& other) : QuadTree(other.m_bounds, other.m_capacity) { }
-        QuadTree();
 
-        // Inserts an object into this quadtree
-        inline bool insert(T& obj, const Point& point)
-        {
-            return insert(obj, Rect(point.x, point.y, 1, 1));
-        }
+        /** insert
+         *
+         *  Insert an object into the quadtree 
+         * 
+         *  \param obj      object to insert into the quadtree
+         *  \param point    the object position in the scene
+         * 
+         *  \return     True or false wether the insertion was successful
+         */
+        inline bool insert(T& obj, const Point& point){ return insert(obj, Rect(point.x, point.y, 1, 1)); }
 
-        inline bool insert(T& obj, double x, double y)
-        {
-            return insert(obj, Point(x, y));
-        }
+        /** insert
+         * 
+         * Insert an object into the quadtree 
+         * 
+         * \param obj   object to insert into the quadtree
+         * \param x     object X coordinate
+         * \param y     object Y coordinate
+         * \return      True or false wether the insertion was successful
+         */
+        inline bool insert(T& obj, double x, double y){ return insert(obj, Point(x, y)); }
 
-        inline bool insert(T& obj, const Rect& bound)
-        {
-            auto node = std::make_shared<Node<T>>(&obj, bound);
-            return insert(node);
-        }
+        /** insert
+         * 
+         * Insert an object into the quadtree 
+         * 
+         * \param obj       object to insert into the quadtree
+         * \param bound     object's bound in space
+         * \return          True or false wether the insertion was successful
+         */
+        inline bool insert(T& obj, const Rect& bound){ return insert(std::make_shared<Node<T>>(&obj, bound)); }
         
+        /** remove
+         * 
+         * Remove an element from the quadtree
+         * 
+         * \param node  The node to be removed from the quadtree
+         * \return True or false wether the removal was successful
+         */
         bool remove(const Node<T>& node);
+
+        /** query
+         * 
+         * Query the Quadtree with a given range, this will return all the objects in the quadtree with a bound that intersects the given range
+         * 
+         * \param range     A shape that will be used to query the Quadtree
+         * \return          A set of unique elements which their bound intersects the given range
+         */
         inline std::unordered_set<const Node<T>*> query(const Shape& range);
+
+        /** draw
+         * 
+         * Draw the quadtree using a callback function that accepts Rect and returns void
+         * 
+         * Example usage:
+         * draw([](Rect& rect){ awesome_draw_rectangle_function(rect.x, rect.y, rect.width, rect.height); })
+         * 
+         * \param func      A callback function to draw the quadtree with
+         */
         inline void draw(std::function<void(const Rect&)> func) const;
+
+        /** clear
+         * 
+         * Clear the quadtree and it's children recursively
+         * 
+         * \return 
+         */
         inline void clear() noexcept;
 
         ~QuadTree();
     private:
+        QuadTree() = delete;
         bool insert(std::shared_ptr<Node<T>> node);
         void subdivide();
         void discardEmptyBuckets();
@@ -144,9 +248,7 @@ namespace qtree
         std::vector<std::shared_ptr<Node<T>>> m_nodes;
     };
 
-    ///////////////////////////////////////////////////////
-    ///////////////  Quadtree implementation  /////////////
-    ///////////////////////////////////////////////////////
+    /** Quadtree implementation  */
     template<typename T>
     inline QuadTree<T>::QuadTree(const Rect& _bound, unsigned _capacity) :
         m_bounds(_bound),
@@ -155,7 +257,6 @@ namespace qtree
         m_nodes.reserve(_capacity);
     }
 
-    // Inserts an object into this quadtree
     template<typename T>
     inline bool QuadTree<T>::insert(std::shared_ptr<Node<T>> node)
     {
@@ -183,7 +284,6 @@ namespace qtree
         return true;
     }
 
-    // Removes an object from this quadtree
     template<typename T>
     inline bool QuadTree<T>::remove(const Node<T>& node)
     {
@@ -198,7 +298,6 @@ namespace qtree
         return true;
     }
 
-    // Query the Quadtree for points inside the bound rect and return as vector
     template<typename T>
     inline std::unordered_set<const Node<T>*> QuadTree<T>::query(const Shape& range)
     {
@@ -207,7 +306,6 @@ namespace qtree
         return foundObjects;
     }
 
-    // Query the Quadtree for points inside the bound rect and return as vector
     template<typename T>
     inline void QuadTree<T>::query(const Shape& range, std::unordered_set<const Node<T>*>& foundObjects)
     {
@@ -240,7 +338,6 @@ namespace qtree
         }
     }
 
-    // Removes all objects and children from this quadtree
     template<typename T>
     inline void QuadTree<T>::clear() noexcept {
         m_nodes.clear();
@@ -258,7 +355,6 @@ namespace qtree
         }
     }
 
-    // Subdivides into four sub quadtrees
     template<typename T>
     inline void QuadTree<T>::subdivide() {
         double width = m_bounds.width * 0.5f;
@@ -278,7 +374,6 @@ namespace qtree
         m_isLeaf = false;
     }
 
-    // Discards buckets if all children are leaves and contain no Nodes
     template<typename T>
     inline void QuadTree<T>::discardEmptyBuckets() {
         if (!m_nodes.empty()) return;
@@ -293,7 +388,6 @@ namespace qtree
         if (m_parent) m_parent->discardEmptyBuckets();
     }
 
-    // draw the quadtree using a callback function
     template<typename T>
     inline void QuadTree<T>::draw(std::function<void(const Rect&)> func) const
     {
@@ -312,9 +406,7 @@ namespace qtree
         clear();
     }
 
-    ///////////////////////////////////////////////////////
-    ///////////////  Circle implementation  ///////////////
-    ///////////////////////////////////////////////////////
+    /** Circle implementation */
     inline bool Circle::intersects(const Rect& other) const noexcept 
     {
         double dx = abs(x - (other.x + other.width / 2));
@@ -337,10 +429,7 @@ namespace qtree
         return (radius * radius) >= (dx * dx) + (dy * dy);
     }
 
-    ///////////////////////////////////////////////////////
-    ///////////////  Rectangle implementation  ////////////
-    ///////////////////////////////////////////////////////
-    
+    /** Rectangle implementation */
     inline bool Rect::intersects(const Rect& other) const noexcept 
     {
         if (x > other.x + other.width)  return false;
